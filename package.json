@@ -1,0 +1,13 @@
+{
+  "name": "scry",
+  "private": true,
+  "workspaces": ["web", "server"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w web\" \"npm run dev -w server\"",
+    "build": "npm run build -w web && npm run build -w server",
+    "start": "npm start -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

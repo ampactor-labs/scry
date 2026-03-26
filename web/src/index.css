@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0a0a0f;
+  --color-surface: #111118;
+  --color-border: #1e1e2e;
+  --color-accent: #7c3aed;
+  --color-accent-hover: #6d28d9;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-critical: #991b1b;
+  --color-text: #f1f5f9;
+  --color-muted: #64748b;
+
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+/* Wallet adapter overrides for dark theme */
+.wallet-adapter-button {
+  background-color: var(--color-accent) !important;
+  border-radius: 0.5rem !important;
+  font-family: var(--font-sans) !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  background-color: var(--color-surface) !important;
+}
+
+/* Risk dial animation */
+@keyframes dial-fill {
+  from {
+    stroke-dashoffset: var(--dial-circumference);
+  }
+  to {
+    stroke-dashoffset: var(--dial-offset);
+  }
+}
+
+.animate-dial-fill {
+  animation: dial-fill 0.8s ease-out forwards;
+}
+
+/* Fade in for report sections */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
