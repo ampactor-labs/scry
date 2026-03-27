@@ -1,5 +1,8 @@
 [phases.setup]
-nixPkgs = ["python3", "gcc", "gnumake"]
+nixPkgs = ["nodejs_22", "python3", "gcc", "gnumake"]
+
+[phases.install]
+cmds = ["npm ci"]
 
 [phases.build]
 cmds = ["npm run build"]
