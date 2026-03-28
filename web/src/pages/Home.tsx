@@ -227,14 +227,23 @@ export function Home() {
         </div>
       </section>
 
-      {/* Social proof */}
+      {/* Engine credit */}
       <section className="text-center space-y-2 py-4">
         <p className="text-muted text-sm">
-          Powered by <span className="text-text font-medium">TokenSafe</span> —
-          the same engine behind 10M+ token safety checks.
+          Powered by{" "}
+          <a
+            href="https://tokensafe-production.up.railway.app/.well-known/x402"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-text font-medium hover:text-accent transition-colors"
+          >
+            TokenSafe
+          </a>{" "}
+          — deterministic on-chain analysis via x402 micropayments.
         </p>
         <p className="text-muted text-xs">
-          Deterministic on-chain analysis. No third-party APIs. No opaque ML.
+          Pure RPC data. No third-party proxies. No opaque ML. Every risk point
+          traceable to on-chain state.
         </p>
       </section>
     </div>
