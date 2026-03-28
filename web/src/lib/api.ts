@@ -150,6 +150,24 @@ export async function fetchLiteScan(mint: string): Promise<LiteScanResult> {
   return res.json() as Promise<LiteScanResult>;
 }
 
+/** Fetches a full report for free (launch period — no auth). */
+export async function fetchFullReportFree(
+  mint: string,
+): Promise<FullCheckResult> {
+  const res = await fetch(`/api/full-check-free?mint=${mint}`);
+  if (!res.ok) {
+    let message = `HTTP ${res.status}`;
+    try {
+      const body = await res.json();
+      message = body.message || body.error || message;
+    } catch {
+      // ignore parse errors
+    }
+    throw new Error(message);
+  }
+  return res.json() as Promise<FullCheckResult>;
+}
+
 /** Fetches a full paid report from the Scry backend proxy. */
 export async function fetchFullReport(
   mint: string,

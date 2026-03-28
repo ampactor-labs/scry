@@ -1,27 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useLiteScan } from "../hooks/useLiteScan";
-import { useFullReport } from "../hooks/useFullReport";
 import { LiteReport } from "../components/LiteReport";
 import { FullReport } from "../components/FullReport";
-import { PaymentModal } from "../components/PaymentModal";
+import { fetchFullReportFree, type FullCheckResult } from "../lib/api";
 import { saveRecentScan } from "./Home";
-
-const SESSION_KEY = (mint: string) => `scry_token_${mint}`;
 
 /** Main scan/report page — driven by :mint URL param. */
 export function Scan() {
   const { mint = "" } = useParams<{ mint: string }>();
-  const [showPayment, setShowPayment] = useState(false);
-
-  // Restore access token from session storage (survives page refresh)
-  const [accessToken, setAccessToken] = useState<string | null>(() => {
-    try {
-      return sessionStorage.getItem(SESSION_KEY(mint));
-    } catch {
-      return null;
-    }
-  });
 
   const {
     data: liteData,
@@ -29,31 +16,21 @@ export function Scan() {
     error: liteError,
     scan,
   } = useLiteScan();
-  const {
-    data: fullData,
-    loading: fullLoading,
-    error: fullError,
-  } = useFullReport(mint, accessToken);
+
+  const [fullData, setFullData] = useState<FullCheckResult | null>(null);
+  const [fullLoading, setFullLoading] = useState(false);
 
   // Kick off lite scan on mount / when mint changes
   useEffect(() => {
     if (mint) scan(mint);
-    // Reset payment state if navigating to a new mint
-    setShowPayment(false);
-    const stored = (() => {
-      try {
-        return sessionStorage.getItem(SESSION_KEY(mint));
-      } catch {
-        return null;
-      }
-    })();
-    setAccessToken(stored);
+    setFullData(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mint]);
 
-  // Persist to recent scans once lite data arrives
+  // Once lite data arrives, auto-fetch full report
   useEffect(() => {
     if (!liteData) return;
+
     saveRecentScan({
       mint: liteData.mint,
       name: liteData.name,
@@ -61,17 +38,25 @@ export function Scan() {
       risk_score: liteData.risk_score,
       risk_level: liteData.risk_level,
     });
-  }, [liteData]);
 
-  function handlePaymentComplete(token: string) {
-    try {
-      sessionStorage.setItem(SESSION_KEY(mint), token);
-    } catch {
-      // ignore
-    }
-    setAccessToken(token);
-    setShowPayment(false);
-  }
+    // Auto-fetch full report (free during launch)
+    let cancelled = false;
+    setFullLoading(true);
+    fetchFullReportFree(liteData.mint)
+      .then((data) => {
+        if (!cancelled) setFullData(data);
+      })
+      .catch(() => {
+        // Silently fail — lite report is still showing
+      })
+      .finally(() => {
+        if (!cancelled) setFullLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [liteData]);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
@@ -101,56 +86,33 @@ export function Scan() {
         </div>
       )}
 
-      {/* Full report (paid) — shown when accessToken is present */}
-      {!liteLoading && !liteError && liteData && accessToken && (
+      {/* Report — full if loaded, lite as fallback */}
+      {!liteLoading && !liteError && liteData && (
         <>
-          {fullLoading && (
-            <div className="flex flex-col items-center gap-4 py-10">
-              <LoadingSpinner />
-              <p className="text-muted text-sm">Loading full report…</p>
-            </div>
-          )}
-          {fullError && (
-            <div className="mb-4 rounded-lg border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning">
-              Failed to load full report: {fullError}. Showing lite report
-              instead.
-            </div>
-          )}
-          {fullData && !fullLoading && <FullReport data={fullData} />}
-          {/* Fallback to lite while full is loading or errored */}
-          {!fullData && !fullLoading && (
-            <LiteReport
-              data={liteData}
-              onGetFullReport={() => setShowPayment(true)}
-            />
+          {fullData ? (
+            <FullReport data={fullData} />
+          ) : (
+            <>
+              <LiteReport data={liteData} onGetFullReport={() => {}} />
+              {fullLoading && (
+                <div className="flex items-center justify-center gap-2 py-4 text-sm text-muted">
+                  <LoadingSpinner small />
+                  Loading detailed analysis…
+                </div>
+              )}
+            </>
           )}
         </>
-      )}
-
-      {/* Lite report — shown when no access token yet */}
-      {!liteLoading && !liteError && liteData && !accessToken && (
-        <LiteReport
-          data={liteData}
-          onGetFullReport={() => setShowPayment(true)}
-        />
-      )}
-
-      {/* Payment modal */}
-      {showPayment && liteData && (
-        <PaymentModal
-          mint={mint}
-          onPaymentComplete={handlePaymentComplete}
-          onClose={() => setShowPayment(false)}
-        />
       )}
     </div>
   );
 }
 
-function LoadingSpinner() {
+function LoadingSpinner({ small }: { small?: boolean }) {
+  const size = small ? "h-4 w-4" : "h-8 w-8";
   return (
     <svg
-      className="animate-spin h-8 w-8 text-accent"
+      className={`animate-spin ${size} text-accent`}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"

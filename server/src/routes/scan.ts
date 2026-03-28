@@ -16,6 +16,25 @@ export const scanRouter = Router();
  * Response 400: { error: string }
  * Response 401: { error: string }  — missing/invalid/expired token
  */
+/**
+ * GET /api/full-check-free
+ *
+ * Free full report — no auth required. For launch period only.
+ * When paywall is re-enabled, remove this route.
+ */
+scanRouter.get("/full-check-free", async (req, res) => {
+  const mint = req.query.mint as string | undefined;
+
+  if (!mint || mint.length < 32 || mint.length > 44) {
+    res.status(400).json({ error: "Invalid mint address" });
+    return;
+  }
+
+  const data = await fetchFullCheck(mint);
+  logger.info({ mint }, "full-check-free served");
+  res.json(data);
+});
+
 scanRouter.post("/full-check", async (req, res) => {
   const { mint, access_token } = req.body as Record<string, unknown>;
 

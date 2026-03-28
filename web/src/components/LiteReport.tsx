@@ -12,7 +12,10 @@ interface LiteReportProps {
 }
 
 /** Assembles the free lite scan report. */
-export function LiteReport({ data, onGetFullReport }: LiteReportProps) {
+export function LiteReport({
+  data,
+  onGetFullReport: _onGetFullReport,
+}: LiteReportProps) {
   const [copied, setCopied] = useState(false);
 
   function copyAddress() {
@@ -189,20 +192,11 @@ export function LiteReport({ data, onGetFullReport }: LiteReportProps) {
         </div>
       </div>
 
-      {/* --- CTA --- */}
-      <div className="rounded-xl border border-accent/30 bg-accent/10 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
-          <p className="text-text font-semibold">Get the Full Report</p>
-          <p className="text-muted text-sm mt-0.5">
-            Holder analysis, LP lock details, Token-2022 extensions &amp; more.
-          </p>
-        </div>
-        <button
-          onClick={onGetFullReport}
-          className="bg-accent hover:bg-accent-hover text-white rounded-lg px-5 py-2.5 font-medium transition-colors whitespace-nowrap"
-        >
-          Unlock for $1.50
-        </button>
+      {/* --- Full report loading indicator --- */}
+      <div className="rounded-xl border border-accent/30 bg-accent/10 p-4 text-center">
+        <p className="text-sm text-muted">
+          Full detailed report loading below…
+        </p>
       </div>
     </div>
   );
