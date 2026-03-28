@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useLiteScan } from "../hooks/useLiteScan";
 import { useFullReport } from "../hooks/useFullReport";
 import { LiteReport } from "../components/LiteReport";
@@ -75,6 +75,16 @@ export function Scan() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
+      {/* Scan another */}
+      <div className="mb-6">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-accent transition-colors"
+        >
+          <span>←</span> Scan another token
+        </Link>
+      </div>
+
       {/* Loading state */}
       {liteLoading && (
         <div className="flex flex-col items-center gap-4 py-20 animate-fade-in">

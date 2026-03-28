@@ -1,7 +1,7 @@
 export function Footer() {
   return (
-    <footer className="border-t border-border px-6 py-6 text-center text-sm text-muted">
-      <p>
+    <footer className="border-t border-border px-6 py-8 space-y-2 text-center">
+      <p className="text-sm text-muted">
         Powered by{" "}
         <a
           href="https://tokensafe-production.up.railway.app/.well-known/x402"
@@ -11,7 +11,11 @@ export function Footer() {
         >
           TokenSafe
         </a>{" "}
-        on-chain analysis. Not financial advice.
+        on-chain analysis engine.
+      </p>
+      <p className="text-xs text-muted/60">
+        Scry provides informational data only. This is not financial advice.
+        Always do your own research before trading.
       </p>
     </footer>
   );

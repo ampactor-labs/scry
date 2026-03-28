@@ -6,46 +6,36 @@ interface RiskDialProps {
   level: string;
 }
 
-const SIZE = 200;
-const STROKE_WIDTH = 14;
+const SIZE = 220;
+const STROKE_WIDTH = 18;
 const RADIUS = (SIZE - STROKE_WIDTH) / 2;
-// 270-degree arc: gap at bottom (45° on each side)
 const ARC_DEGREES = 270;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS * (ARC_DEGREES / 360);
-
-// The arc starts at -225deg from 12-o'clock (i.e. 135deg from east = bottom-left)
-// SVG rotate: start at 135deg (bottom-left gap start), sweep 270deg clockwise
-const ROTATION = 135; // degrees
+const ROTATION = 135;
 
 /**
  * Hero animated SVG dial showing risk score 0-100 as a 270-degree arc.
- * Uses CSS stroke-dashoffset animation defined in index.css (.animate-dial-fill).
+ * Thicker stroke with glow effect for visual impact.
  */
 export function RiskDial({ score, level }: RiskDialProps) {
   const clampedScore = Math.max(0, Math.min(100, score));
   const color = scoreColor(clampedScore);
-
-  // Offset: 0 = full arc, CIRCUMFERENCE = empty arc
   const targetOffset = CIRCUMFERENCE * (1 - clampedScore / 100);
-
   const fgRef = useRef<SVGCircleElement>(null);
 
   useEffect(() => {
     const el = fgRef.current;
     if (!el) return;
-
-    // Set CSS custom properties for the keyframe animation
     el.style.setProperty("--dial-circumference", `${CIRCUMFERENCE}`);
     el.style.setProperty("--dial-offset", `${targetOffset}`);
-
-    // Reset so animation re-triggers on score change
     el.classList.remove("animate-dial-fill");
-    void (el as unknown as HTMLElement).offsetWidth; // force reflow
+    void (el as unknown as HTMLElement).offsetWidth;
     el.classList.add("animate-dial-fill");
   }, [clampedScore, targetOffset]);
 
   const cx = SIZE / 2;
   const cy = SIZE / 2;
+  const glowId = `dial-glow-${clampedScore}`;
 
   return (
     <div className="flex flex-col items-center select-none">
@@ -55,7 +45,18 @@ export function RiskDial({ score, level }: RiskDialProps) {
         viewBox={`0 0 ${SIZE} ${SIZE}`}
         aria-label={`Risk score ${clampedScore} — ${level}`}
         role="img"
+        className="drop-shadow-lg"
       >
+        <defs>
+          <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
         {/* Background track */}
         <circle
           cx={cx}
@@ -67,9 +68,10 @@ export function RiskDial({ score, level }: RiskDialProps) {
           strokeDasharray={`${CIRCUMFERENCE} ${2 * Math.PI * RADIUS}`}
           strokeLinecap="round"
           transform={`rotate(${ROTATION} ${cx} ${cy})`}
+          opacity={0.6}
         />
 
-        {/* Foreground arc — animated via CSS */}
+        {/* Foreground arc with glow */}
         <circle
           ref={fgRef}
           cx={cx}
@@ -82,34 +84,36 @@ export function RiskDial({ score, level }: RiskDialProps) {
           strokeDashoffset={CIRCUMFERENCE}
           strokeLinecap="round"
           transform={`rotate(${ROTATION} ${cx} ${cy})`}
+          filter={`url(#${glowId})`}
           style={{ transition: "stroke 0.3s ease" }}
         />
 
-        {/* Score number */}
+        {/* Score number — large and bold */}
         <text
           x={cx}
-          y={cy - 6}
+          y={cy - 8}
           textAnchor="middle"
           dominantBaseline="middle"
           fill={color}
-          fontSize="42"
-          fontWeight="700"
+          fontSize="54"
+          fontWeight="800"
           fontFamily="var(--font-sans)"
         >
           {clampedScore}
         </text>
 
-        {/* Risk level label */}
+        {/* Risk level label — colored to match arc */}
         <text
           x={cx}
-          y={cy + 28}
+          y={cy + 30}
           textAnchor="middle"
           dominantBaseline="middle"
-          fill="var(--color-muted)"
-          fontSize="13"
-          fontWeight="500"
+          fill={color}
+          fontSize="14"
+          fontWeight="600"
           fontFamily="var(--font-sans)"
-          letterSpacing="0.08em"
+          letterSpacing="0.1em"
+          opacity={0.9}
         >
           {level}
         </text>

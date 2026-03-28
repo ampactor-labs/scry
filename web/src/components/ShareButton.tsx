@@ -32,7 +32,7 @@ export function ShareButton({
       href={tweetUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-muted hover:text-text hover:border-accent/50 transition-colors"
+      className="inline-flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-4 py-2 text-sm font-medium text-accent hover:bg-accent/20 hover:border-accent/60 transition-colors"
     >
       <XLogo />
       Share Scan

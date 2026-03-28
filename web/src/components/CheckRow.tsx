@@ -13,12 +13,20 @@ const riskDot: Record<RiskLevel, string> = {
   DANGEROUS: "bg-danger",
 };
 
+const riskBg: Record<RiskLevel, string> = {
+  SAFE: "",
+  WARNING: "",
+  DANGEROUS: "bg-danger/5 -mx-3 px-3 rounded-lg",
+};
+
 const defaultIcon = "◈";
 
 /** Single row displaying a check label, value, and risk indicator dot. */
 export function CheckRow({ label, value, risk, icon }: CheckRowProps) {
   return (
-    <div className="flex items-center gap-3 py-2.5 border-b border-border last:border-0">
+    <div
+      className={`flex items-center gap-3 py-2.5 border-b border-border last:border-0 ${riskBg[risk]}`}
+    >
       {/* Icon */}
       <span className="text-muted text-base w-5 text-center shrink-0">
         {icon ?? defaultIcon}
@@ -28,11 +36,17 @@ export function CheckRow({ label, value, risk, icon }: CheckRowProps) {
       <span className="flex-1 text-sm text-muted">{label}</span>
 
       {/* Value */}
-      <span className="text-sm text-text font-medium font-mono">{value}</span>
+      <span
+        className={`text-sm font-medium font-mono ${
+          risk === "DANGEROUS" ? "text-danger" : "text-text"
+        }`}
+      >
+        {value}
+      </span>
 
       {/* Risk dot */}
       <span
-        className={`w-2 h-2 rounded-full shrink-0 ${riskDot[risk]}`}
+        className={`w-2.5 h-2.5 rounded-full shrink-0 ${riskDot[risk]}`}
         title={risk}
       />
     </div>
