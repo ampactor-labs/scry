@@ -8,10 +8,12 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 
-const USDC_MINT = import.meta.env.VITE_USDC_MINT as string;
-const TREASURY = import.meta.env.VITE_TREASURY_WALLET as string;
+const USDC_MINT =
+  import.meta.env.VITE_USDC_MINT ||
+  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+const TREASURY = import.meta.env.VITE_TREASURY_WALLET || "";
 // Convert dollar amount to USDC micro-units (6 decimals)
-const PAYMENT_DOLLARS = Number(import.meta.env.VITE_PAYMENT_AMOUNT ?? "1.5");
+const PAYMENT_DOLLARS = Number(import.meta.env.VITE_PAYMENT_AMOUNT || "1.5");
 const PAYMENT_AMOUNT = BigInt(Math.round(PAYMENT_DOLLARS * 1_000_000));
 
 interface PaymentModalProps {
@@ -41,6 +43,9 @@ export function PaymentModal({
     setErrorMsg(null);
 
     try {
+      if (!TREASURY) {
+        throw new Error("Payment not configured. Please try again later.");
+      }
       const usdcMint = new PublicKey(USDC_MINT);
       const treasury = new PublicKey(TREASURY);
 

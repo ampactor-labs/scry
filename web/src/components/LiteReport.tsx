@@ -29,9 +29,13 @@ export function LiteReport({ data, onGetFullReport }: LiteReportProps) {
         <RiskDial score={data.risk_score} level={data.risk_level} />
 
         <div className="text-center space-y-1">
-          <div className="flex items-center justify-center gap-2">
-            <h1 className="text-xl font-bold text-text">{data.name}</h1>
-            <span className="text-muted text-sm">{data.symbol}</span>
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <h1 className="text-xl font-bold text-text">
+              {data.name || "Unknown Token"}
+            </h1>
+            {data.symbol && (
+              <span className="text-muted text-sm">{data.symbol}</span>
+            )}
             <RiskBadge level={data.risk_level} />
           </div>
 
@@ -97,8 +101,18 @@ export function LiteReport({ data, onGetFullReport }: LiteReportProps) {
         <div className="divide-y divide-border">
           <CheckRow
             label="Authorities Renounced"
-            value={data.authorities_renounced ? "Yes" : "No"}
-            risk={data.authorities_renounced ? "SAFE" : "WARNING"}
+            value={
+              data.authorities_renounced
+                ? "Yes"
+                : data.trusted_authority
+                  ? "No (trusted issuer)"
+                  : "No"
+            }
+            risk={
+              data.authorities_renounced || data.trusted_authority
+                ? "SAFE"
+                : "WARNING"
+            }
             icon="🔑"
           />
           {data.trusted_authority && (
