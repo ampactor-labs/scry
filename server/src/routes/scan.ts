@@ -2,27 +2,19 @@ import { Router } from "express";
 import { verifyAccessToken } from "../lib/access-token.js";
 import { fetchFullCheck } from "../lib/tokensafe.js";
 import { logger } from "../lib/logger.js";
+import { createRateLimiter } from "../lib/rate-limit.js";
 
 export const scanRouter = Router();
 
-/**
- * POST /api/full-check
- *
- * Returns the full tokensafe safety report for a token mint, authenticated via
- * an access token issued by POST /api/verify-payment.
- *
- * Request body: { mint: string, access_token: string }
- * Response 200: full tokensafe check JSON
- * Response 400: { error: string }
- * Response 401: { error: string }  — missing/invalid/expired token
- */
+const freeCheckLimiter = createRateLimiter(20); // 20 full checks/min per IP
+
 /**
  * GET /api/full-check-free
  *
- * Free full report — no auth required. For launch period only.
+ * Free full report — rate limited, no auth. For launch period only.
  * When paywall is re-enabled, remove this route.
  */
-scanRouter.get("/full-check-free", async (req, res) => {
+scanRouter.get("/full-check-free", freeCheckLimiter, async (req, res) => {
   const mint = req.query.mint as string | undefined;
 
   if (!mint || mint.length < 32 || mint.length > 44) {

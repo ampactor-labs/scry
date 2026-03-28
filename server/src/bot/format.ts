@@ -27,7 +27,10 @@ export function escapeMarkdownV2(text: string): string {
 /**
  * Formats a tokensafe lite check response as a Telegram MarkdownV2 message.
  */
-export function formatLiteReport(data: LiteCheckResponse): string {
+export function formatLiteReport(
+  data: LiteCheckResponse,
+  baseUrl?: string,
+): string {
   const {
     mint,
     name,
@@ -82,8 +85,6 @@ export function formatLiteReport(data: LiteCheckResponse): string {
 
   const summaryLine = summary ? `\n_${escapeMarkdownV2(summary)}_\n` : "";
 
-  // Shorten mint for the link label
-  const mintShort = `${mint.slice(0, 4)}\\.\\.\\. ${mint.slice(-4)}`;
   const mintEsc = escapeMarkdownV2(mint);
 
   return [
@@ -98,7 +99,7 @@ export function formatLiteReport(data: LiteCheckResponse): string {
     ageLine,
     holderLine,
     summaryLine,
-    `🔗 Full report: [scry\\.app/scan/${mintShort}](https://scry\\.app/scan/${mint})`,
+    `🔗 Full report: [Open in Scry](${escapeMarkdownV2(baseUrl ?? "https://scry-production.up.railway.app")}/scan/${mint})`,
   ]
     .filter(Boolean)
     .join("\n");

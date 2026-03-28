@@ -28,7 +28,12 @@ const severityClasses: Record<string, string> = {
 /** Full report — shows detailed checks, score breakdown, alerts. */
 export function FullReport({ data }: FullReportProps) {
   const { checks } = data;
-  const checkedAt = new Date(data.checked_at).toLocaleString();
+  const checkedAt = data.checked_at
+    ? new Date(data.checked_at).toLocaleString()
+    : "Unknown";
+  const alerts = data.alerts ?? [];
+  const riskFactors = data.risk_factors ?? [];
+  const scoreBreakdown = data.score_breakdown ?? {};
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -68,10 +73,10 @@ export function FullReport({ data }: FullReportProps) {
       </div>
 
       {/* --- Alerts --- */}
-      {data.alerts.length > 0 && (
+      {alerts.length > 0 && (
         <section className="space-y-2">
           <h2 className="text-sm font-semibold text-text">Alerts</h2>
-          {data.alerts.map((alert, i) => (
+          {alerts.map((alert, i) => (
             <div
               key={i}
               className={`rounded-lg border px-4 py-3 text-sm flex items-start gap-2 ${severityClasses[alert.severity] ?? severityClasses["INFO"]}`}
@@ -84,11 +89,11 @@ export function FullReport({ data }: FullReportProps) {
       )}
 
       {/* --- Risk factors --- */}
-      {data.risk_factors.length > 0 && (
+      {riskFactors.length > 0 && (
         <section className="rounded-xl border border-border bg-surface p-5 space-y-2">
           <h2 className="text-sm font-semibold text-text mb-3">Risk Factors</h2>
           <ul className="space-y-1.5">
-            {data.risk_factors.map((f, i) => (
+            {riskFactors.map((f, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-muted">
                 <span className="text-danger mt-0.5 shrink-0">▪</span>
                 {f}
@@ -99,13 +104,13 @@ export function FullReport({ data }: FullReportProps) {
       )}
 
       {/* --- Score breakdown --- */}
-      {Object.keys(data.score_breakdown).length > 0 && (
+      {Object.keys(scoreBreakdown).length > 0 && (
         <section className="rounded-xl border border-border bg-surface p-5">
           <h2 className="text-sm font-semibold text-text mb-4">
             Score Breakdown
           </h2>
           <div className="space-y-3">
-            {Object.entries(data.score_breakdown)
+            {Object.entries(scoreBreakdown)
               .sort(([, a], [, b]) => b - a)
               .map(([key, pts]) => {
                 const pct =

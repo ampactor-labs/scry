@@ -15,9 +15,9 @@ function isValidSolanaAddress(text: string): boolean {
   return SOLANA_ADDRESS_RE.test(text.trim());
 }
 
-async function runScan(mint: string): Promise<string> {
+async function runScan(mint: string, baseUrl: string): Promise<string> {
   const data = await fetchLiteCheck(mint);
-  return formatLiteReport(data as LiteCheckResponse);
+  return formatLiteReport(data as LiteCheckResponse, baseUrl);
 }
 
 /**
@@ -53,7 +53,7 @@ export async function setupBot(
       parse_mode: undefined,
     });
     try {
-      const report = await runScan(mint);
+      const report = await runScan(mint, serverUrl);
       await ctx.reply(report, { parse_mode: "MarkdownV2" });
     } catch (err) {
       logger.warn({ err, mint }, "bot /scan error");
@@ -73,7 +73,7 @@ export async function setupBot(
     }
     const mint = args.trim();
     await ctx.reply(
-      `Full reports are available on the web!\n\n🔗 scry.app/scan/${mint}`,
+      `Full reports are available on the web!\n\n🔗 ${serverUrl}/scan/${mint}`,
     );
   });
 
@@ -85,7 +85,7 @@ export async function setupBot(
     }
     await ctx.reply("Scanning token... please wait.");
     try {
-      const report = await runScan(text);
+      const report = await runScan(text, serverUrl);
       await ctx.reply(report, { parse_mode: "MarkdownV2" });
     } catch (err) {
       logger.warn({ err, mint: text }, "bot address scan error");

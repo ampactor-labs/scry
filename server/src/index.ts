@@ -1,6 +1,6 @@
 import { config } from "./config.js";
 import { createApp } from "./app.js";
-import { initDb } from "./db.js";
+import { initDb, getDb } from "./db.js";
 import { logger } from "./lib/logger.js";
 import { setupBot } from "./bot/bot.js";
 
@@ -21,12 +21,31 @@ async function main() {
   }
 
   // Start server
-  app.listen(config.PORT, () => {
+  const server = app.listen(config.PORT, () => {
     logger.info(
       { port: config.PORT, env: config.NODE_ENV },
       `Scry server listening on port ${config.PORT}`,
     );
   });
+
+  // Graceful shutdown — Railway sends SIGTERM before killing
+  function shutdown(signal: string) {
+    logger.info({ signal }, "Shutting down gracefully");
+    server.close(() => {
+      try {
+        getDb().close();
+      } catch {
+        // DB may not be initialized
+      }
+      logger.info("Server closed");
+      process.exit(0);
+    });
+    // Force exit after 10s if graceful shutdown hangs
+    setTimeout(() => process.exit(1), 10_000);
+  }
+
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
 }
 
 main().catch((err) => {
