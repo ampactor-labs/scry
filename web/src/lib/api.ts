@@ -68,12 +68,21 @@ export interface TopHolder {
   amount: number;
 }
 
-export interface FullCheckResult extends LiteScanResult {
+export interface FullCheckResult {
+  mint: string;
+  name: string | null;
+  symbol: string | null;
+  risk_score: number;
+  risk_level: RiskLevel;
+  summary: string;
   checked_at: string;
   rpc_slot: number;
   risk_factors: string[];
   score_breakdown: Record<string, number>;
   alerts: AlertEntry[];
+  degraded: boolean;
+  degraded_checks: string[];
+  data_confidence: "complete" | "partial";
   checks: {
     mint_authority: {
       status: CheckStatus;
@@ -96,7 +105,7 @@ export interface FullCheckResult extends LiteScanResult {
       holder_count_estimate: number;
       top_holders_detail: TopHolder[];
       risk: CheckStatus;
-    };
+    } | null;
     liquidity: {
       status: CheckStatus;
       has_liquidity: boolean;
@@ -104,11 +113,11 @@ export interface FullCheckResult extends LiteScanResult {
       pool_address: string | null;
       price_impact_pct: number | null;
       liquidity_rating: LiquidityRating;
-      lp_locked: boolean;
+      lp_locked: boolean | null;
       lp_lock_percentage: number | null;
       lp_lock_expiry: string | null;
       risk: CheckStatus;
-    };
+    } | null;
     metadata: {
       status: CheckStatus;
       update_authority: string | null;
@@ -116,13 +125,13 @@ export interface FullCheckResult extends LiteScanResult {
       has_uri: boolean;
       uri: string | null;
       risk: CheckStatus;
-    };
+    } | null;
     honeypot: {
       status: CheckStatus;
       can_sell: boolean;
       sell_tax_bps: number | null;
       risk: CheckStatus;
-    };
+    } | null;
     token_age_hours: number | null;
     is_token_2022: boolean;
     token_2022_extensions: Token2022Extension[];

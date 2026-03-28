@@ -25,7 +25,7 @@ const severityClasses: Record<string, string> = {
   INFO: "border-border bg-bg text-muted",
 };
 
-/** Full paid report — shows everything the lite report shows plus detailed checks. */
+/** Full report — shows detailed checks, score breakdown, alerts. */
 export function FullReport({ data }: FullReportProps) {
   const { checks } = data;
   const checkedAt = new Date(data.checked_at).toLocaleString();
@@ -38,8 +38,12 @@ export function FullReport({ data }: FullReportProps) {
 
         <div className="text-center space-y-1">
           <div className="flex items-center justify-center gap-2 flex-wrap">
-            <h1 className="text-xl font-bold text-text">{data.name}</h1>
-            <span className="text-muted text-sm">{data.symbol}</span>
+            <h1 className="text-xl font-bold text-text">
+              {data.name || "Unknown Token"}
+            </h1>
+            {data.symbol && (
+              <span className="text-muted text-sm">{data.symbol}</span>
+            )}
             <RiskBadge level={data.risk_level} />
           </div>
           <p className="font-mono text-xs text-muted">
@@ -104,8 +108,11 @@ export function FullReport({ data }: FullReportProps) {
             {Object.entries(data.score_breakdown)
               .sort(([, a], [, b]) => b - a)
               .map(([key, pts]) => {
-                const pct = Math.min(100, (pts / data.risk_score) * 100);
-                const color = scoreColor(pts * 2); // scale pts to a colour range
+                const pct =
+                  data.risk_score > 0
+                    ? Math.min(100, (pts / data.risk_score) * 100)
+                    : 0;
+                const color = scoreColor(pts * 2);
                 return (
                   <div key={key}>
                     <div className="flex justify-between text-xs mb-1">
@@ -138,13 +145,7 @@ export function FullReport({ data }: FullReportProps) {
                 ? truncateAddress(checks.mint_authority.authority)
                 : "Renounced"
             }
-            risk={
-              checks.mint_authority.risk === "SAFE"
-                ? "SAFE"
-                : checks.mint_authority.risk === "WARNING"
-                  ? "WARNING"
-                  : "DANGEROUS"
-            }
+            risk={checks.mint_authority.risk === "SAFE" ? "SAFE" : "DANGEROUS"}
             icon="🔑"
           />
           <CheckRow
@@ -155,119 +156,129 @@ export function FullReport({ data }: FullReportProps) {
                 : "Renounced"
             }
             risk={
-              checks.freeze_authority.risk === "SAFE"
-                ? "SAFE"
-                : checks.freeze_authority.risk === "WARNING"
-                  ? "WARNING"
-                  : "DANGEROUS"
+              checks.freeze_authority.risk === "SAFE" ? "SAFE" : "DANGEROUS"
             }
             icon="❄"
           />
-          <CheckRow
-            label="Metadata Mutable"
-            value={checks.metadata.mutable ? "Yes" : "No"}
-            risk={checks.metadata.mutable ? "WARNING" : "SAFE"}
-            icon="📝"
-          />
-          <CheckRow
-            label="Update Authority"
-            value={
-              checks.metadata.update_authority
-                ? truncateAddress(checks.metadata.update_authority)
-                : "—"
-            }
-            risk={checks.metadata.update_authority ? "WARNING" : "SAFE"}
-            icon="✏"
-          />
+          {checks.metadata && (
+            <>
+              <CheckRow
+                label="Metadata Mutable"
+                value={checks.metadata.mutable ? "Yes" : "No"}
+                risk={checks.metadata.mutable ? "WARNING" : "SAFE"}
+                icon="📝"
+              />
+              <CheckRow
+                label="Update Authority"
+                value={
+                  checks.metadata.update_authority
+                    ? truncateAddress(checks.metadata.update_authority)
+                    : "—"
+                }
+                risk={checks.metadata.update_authority ? "WARNING" : "SAFE"}
+                icon="✏"
+              />
+            </>
+          )}
         </div>
       </section>
 
       {/* --- Top Holders --- */}
-      <section className="rounded-xl border border-border bg-surface p-5 space-y-4">
-        <h2 className="text-sm font-semibold text-text">Holder Analysis</h2>
+      {checks.top_holders && (
+        <section className="rounded-xl border border-border bg-surface p-5 space-y-4">
+          <h2 className="text-sm font-semibold text-text">Holder Analysis</h2>
 
-        <HolderBar percentage={checks.top_holders.top_10_percentage} />
+          <HolderBar percentage={checks.top_holders.top_10_percentage} />
 
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <Stat
-            label="Top-1 %"
-            value={formatPercent(checks.top_holders.top_1_percentage)}
-          />
-          <Stat
-            label="Est. Holders"
-            value={
-              checks.top_holders.holder_count_estimate?.toLocaleString() ??
-              "N/A"
-            }
-          />
-        </div>
-
-        {checks.top_holders.top_holders_detail.length > 0 && (
-          <div className="mt-2">
-            <p className="text-xs text-muted mb-2">Top Holders</p>
-            <div className="space-y-1.5">
-              {checks.top_holders.top_holders_detail.slice(0, 5).map((h, i) => (
-                <div
-                  key={i}
-                  className="flex justify-between text-xs font-mono text-muted"
-                >
-                  <span>{truncateAddress(h.address, 5)}</span>
-                  <span className="text-text">
-                    {formatPercent(h.percentage)}
-                  </span>
-                </div>
-              ))}
-            </div>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <Stat
+              label="Top-1 %"
+              value={formatPercent(checks.top_holders.top_1_percentage)}
+            />
+            <Stat
+              label="Est. Holders"
+              value={
+                checks.top_holders.holder_count_estimate?.toLocaleString() ??
+                "N/A"
+              }
+            />
           </div>
-        )}
-      </section>
+
+          {checks.top_holders.top_holders_detail.length > 0 && (
+            <div className="mt-2">
+              <p className="text-xs text-muted mb-2">Top Holders</p>
+              <div className="space-y-1.5">
+                {checks.top_holders.top_holders_detail
+                  .slice(0, 5)
+                  .map((h, i) => (
+                    <div
+                      key={i}
+                      className="flex justify-between text-xs font-mono text-muted"
+                    >
+                      <span>{truncateAddress(h.address, 5)}</span>
+                      <span className="text-text">
+                        {formatPercent(h.percentage)}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* --- Liquidity --- */}
-      <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-text">Liquidity</h2>
-        <LiquidityCard
-          primary_pool={checks.liquidity.primary_pool}
-          liquidity_rating={checks.liquidity.liquidity_rating}
-          lp_locked={checks.liquidity.lp_locked}
-          lp_lock_percentage={checks.liquidity.lp_lock_percentage}
-          price_impact_pct={checks.liquidity.price_impact_pct}
-        />
-        {checks.liquidity.lp_lock_expiry && (
-          <p className="text-xs text-muted px-1">
-            LP lock expires:{" "}
-            <span className="text-text font-mono">
-              {new Date(checks.liquidity.lp_lock_expiry).toLocaleDateString()}
-            </span>
-          </p>
-        )}
-      </section>
+      {checks.liquidity && (
+        <section className="space-y-4">
+          <h2 className="text-sm font-semibold text-text">Liquidity</h2>
+          <LiquidityCard
+            primary_pool={checks.liquidity.primary_pool}
+            liquidity_rating={checks.liquidity.liquidity_rating}
+            lp_locked={checks.liquidity.lp_locked ?? false}
+            lp_lock_percentage={checks.liquidity.lp_lock_percentage}
+            price_impact_pct={checks.liquidity.price_impact_pct}
+          />
+          {checks.liquidity.lp_lock_expiry && (
+            <p className="text-xs text-muted px-1">
+              LP lock expires:{" "}
+              <span className="text-text font-mono">
+                {new Date(checks.liquidity.lp_lock_expiry).toLocaleDateString()}
+              </span>
+            </p>
+          )}
+        </section>
+      )}
 
       {/* --- Honeypot --- */}
-      <section className="rounded-xl border border-border bg-surface p-5">
-        <h2 className="text-sm font-semibold text-text mb-3">Honeypot Check</h2>
-        <div className="divide-y divide-border">
-          <CheckRow
-            label="Can Sell"
-            value={checks.honeypot.can_sell ? "Yes" : "No"}
-            risk={checks.honeypot.can_sell ? "SAFE" : "DANGEROUS"}
-            icon="🍯"
-          />
-          {checks.honeypot.sell_tax_bps !== null && (
+      {checks.honeypot && (
+        <section className="rounded-xl border border-border bg-surface p-5">
+          <h2 className="text-sm font-semibold text-text mb-3">
+            Honeypot Check
+          </h2>
+          <div className="divide-y divide-border">
             <CheckRow
-              label="Sell Tax"
-              value={`${(checks.honeypot.sell_tax_bps / 100).toFixed(2)}%`}
-              risk={
-                checks.honeypot.sell_tax_bps === 0
-                  ? "SAFE"
-                  : checks.honeypot.sell_tax_bps < 500
-                    ? "WARNING"
-                    : "DANGEROUS"
-              }
-              icon="💸"
+              label="Can Sell"
+              value={checks.honeypot.can_sell ? "Yes" : "No"}
+              risk={checks.honeypot.can_sell ? "SAFE" : "DANGEROUS"}
+              icon="🍯"
             />
-          )}
-        </div>
-      </section>
+            {checks.honeypot.sell_tax_bps !== null && (
+              <CheckRow
+                label="Sell Tax"
+                value={`${(checks.honeypot.sell_tax_bps / 100).toFixed(2)}%`}
+                risk={
+                  checks.honeypot.sell_tax_bps === 0
+                    ? "SAFE"
+                    : checks.honeypot.sell_tax_bps < 500
+                      ? "WARNING"
+                      : "DANGEROUS"
+                }
+                icon="💸"
+              />
+            )}
+          </div>
+        </section>
+      )}
 
       {/* --- Token-2022 Extensions --- */}
       {checks.is_token_2022 && (
