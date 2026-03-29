@@ -55,6 +55,9 @@ export async function setupBot(
     }
   });
 
+  // Clear any previously registered commands so Telegram shows no command hints
+  await bot.api.deleteMyCommands();
+
   // Register webhook with Telegram — authenticate incoming updates
   const webhookUrl = `${serverUrl}/api/telegram-webhook`;
   await bot.api.setWebhook(webhookUrl, webhookSetOptions());
