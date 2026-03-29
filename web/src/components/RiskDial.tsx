@@ -43,7 +43,7 @@ export function RiskDial({ score, level }: RiskDialProps) {
         width={SIZE}
         height={SIZE}
         viewBox={`0 0 ${SIZE} ${SIZE}`}
-        aria-label={`Risk score ${clampedScore} — ${level}`}
+        aria-label={`Rug risk ${clampedScore} — ${level}`}
         role="img"
         className="drop-shadow-lg"
       >

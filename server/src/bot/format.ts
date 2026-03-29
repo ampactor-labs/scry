@@ -92,7 +92,7 @@ export function formatLiteReport(
     tokenLabel,
     `\`${mintEsc}\``,
     ``,
-    `📊 Risk Score: *${riskEmoji} ${scoreLabel}* \\(${riskLevelEsc}\\)`,
+    `📊 Rug Risk: *${riskEmoji} ${scoreLabel}* \\(${riskLevelEsc}\\)`,
     authLine,
     liquidityLine,
     sellLine,
