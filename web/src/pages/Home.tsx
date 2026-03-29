@@ -132,7 +132,7 @@ export function Home() {
           See through any <span className="text-accent">Solana token.</span>
         </h1>
         <p className="text-muted text-lg max-w-xl mx-auto">
-          Paste any contract address. Get an instant safety report. On-chain
+          Paste any token mint address. Get an instant rug risk report. On-chain
           analysis, no BS.
         </p>
         <AddressInput />
