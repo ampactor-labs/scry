@@ -33,51 +33,11 @@ export async function setupBot(
 
   bot.command("start", async (ctx) => {
     await ctx.reply(
-      "Welcome to Scry! Paste any Solana token address to check its safety.\n\n" +
-        "Commands:\n" +
-        "/scan <address> — Free safety scan\n" +
-        "/full <address> — Get the full detailed report",
+      "Welcome to Scry! Paste any Solana token address to check its safety.",
     );
   });
 
-  bot.command("scan", async (ctx) => {
-    const args = ctx.match.trim();
-    if (!args || !isValidSolanaAddress(args)) {
-      await ctx.reply(
-        "Please provide a valid Solana token address.\n\nExample: /scan EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-      );
-      return;
-    }
-    const mint = args.trim();
-    await ctx.reply("Scanning token... please wait.", {
-      parse_mode: undefined,
-    });
-    try {
-      const report = await runScan(mint, serverUrl);
-      await ctx.reply(report, { parse_mode: "MarkdownV2" });
-    } catch (err) {
-      logger.warn({ err, mint }, "bot /scan error");
-      await ctx.reply(
-        "Sorry, I couldn't fetch the safety report right now. Please try again in a moment.",
-      );
-    }
-  });
-
-  bot.command("full", async (ctx) => {
-    const args = ctx.match.trim();
-    if (!args || !isValidSolanaAddress(args)) {
-      await ctx.reply(
-        "Please provide a valid Solana token address.\n\nExample: /full EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-      );
-      return;
-    }
-    const mint = args.trim();
-    await ctx.reply(
-      `Full reports are available on the web!\n\n🔗 ${serverUrl}/scan/${mint}`,
-    );
-  });
-
-  // Treat any plain-text message that looks like a Solana address as an implicit /scan
+  // Treat any plain-text message that looks like a Solana address as a scan
   bot.on("message:text", async (ctx) => {
     const text = ctx.message.text.trim();
     if (!isValidSolanaAddress(text)) {
@@ -88,7 +48,7 @@ export async function setupBot(
       const report = await runScan(text, serverUrl);
       await ctx.reply(report, { parse_mode: "MarkdownV2" });
     } catch (err) {
-      logger.warn({ err, mint: text }, "bot address scan error");
+      logger.warn({ err, mint: text }, "bot scan error");
       await ctx.reply(
         "Sorry, I couldn't fetch the safety report right now. Please try again in a moment.",
       );
