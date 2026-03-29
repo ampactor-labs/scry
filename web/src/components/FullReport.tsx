@@ -209,13 +209,13 @@ export function FullReport({ data }: FullReportProps) {
             />
           </div>
 
-          {checks.top_holders.top_holders_detail.length > 0 && (
+          {(checks.top_holders.top_holders_detail ?? []).length > 0 && (
             <div className="mt-2">
               <p className="text-xs text-muted mb-2">Top Holders</p>
               <div className="space-y-1.5">
                 {checks.top_holders.top_holders_detail
-                  .slice(0, 5)
-                  .map((h, i) => (
+                  ?.slice(0, 5)
+                  ?.map((h, i) => (
                     <div
                       key={i}
                       className="flex justify-between text-xs font-mono text-muted"
@@ -291,11 +291,11 @@ export function FullReport({ data }: FullReportProps) {
           <h2 className="text-sm font-semibold text-text mb-3">
             Token-2022 Extensions
           </h2>
-          {checks.token_2022_extensions.length === 0 ? (
+          {(checks.token_2022_extensions ?? []).length === 0 ? (
             <p className="text-sm text-muted">No extensions detected.</p>
           ) : (
             <div className="space-y-2">
-              {checks.token_2022_extensions.map((ext, i) => {
+              {(checks.token_2022_extensions ?? []).map((ext, i) => {
                 const explainer = getExtensionExplainer(ext.type);
                 return (
                   <div
@@ -341,11 +341,15 @@ export function FullReport({ data }: FullReportProps) {
       <section className="rounded-xl border border-border bg-surface p-5">
         <h2 className="text-sm font-semibold text-text mb-3">Token Info</h2>
         <div className="grid grid-cols-2 gap-3 text-sm">
-          <Stat
-            label="Total Supply"
-            value={Number(checks.supply.total).toLocaleString()}
-          />
-          <Stat label="Decimals" value={String(checks.supply.decimals)} />
+          {checks.supply && (
+            <>
+              <Stat
+                label="Total Supply"
+                value={Number(checks.supply.total).toLocaleString()}
+              />
+              <Stat label="Decimals" value={String(checks.supply.decimals)} />
+            </>
+          )}
           <Stat label="Age" value={formatAge(checks.token_age_hours)} />
           <Stat
             label="Token Standard"
