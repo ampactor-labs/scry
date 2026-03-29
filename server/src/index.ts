@@ -1,5 +1,5 @@
 import { config } from "./config.js";
-import { createApp } from "./app.js";
+import { createApp, finalizeApp } from "./app.js";
 import { initDb, getDb } from "./db.js";
 import { logger } from "./lib/logger.js";
 import { setupBot } from "./bot/bot.js";
@@ -19,6 +19,10 @@ async function main() {
   } else {
     logger.warn("TELEGRAM_BOT_TOKEN not set — bot disabled");
   }
+
+  // Finalize routes (static files, SPA fallback, 404, error handler)
+  // Must come AFTER bot webhook is mounted
+  finalizeApp(app);
 
   // Start server
   const server = app.listen(config.PORT, () => {

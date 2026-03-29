@@ -55,8 +55,18 @@ export function createApp(): express.Express {
   app.use("/api", scanRouter);
   app.use("/", healthRouter);
 
-  // Serve built frontend from web/dist
+  return app;
+}
+
+/**
+ * Registers late-binding routes (bot webhook, static files, SPA fallback,
+ * 404 handler, error handler). Call AFTER mounting any dynamic routes like
+ * the Telegram bot webhook.
+ */
+export function finalizeApp(app: express.Express): void {
   const webDist = path.join(__dirname, "../../web/dist");
+
+  // Serve built frontend from web/dist
   app.use(express.static(webDist));
 
   // SPA fallback — serve index.html for non-API, non-health GET requests
@@ -83,6 +93,4 @@ export function createApp(): express.Express {
       res.status(500).json({ error: "Internal server error" });
     },
   );
-
-  return app;
 }
