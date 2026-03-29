@@ -3,7 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { useLiteScan } from "../hooks/useLiteScan";
 import { LiteReport } from "../components/LiteReport";
 import { FullReport } from "../components/FullReport";
-import { fetchFullReportFree, type FullCheckResult } from "../lib/api";
+import { PaymentModal } from "../components/PaymentModal";
+import { fetchFullReport, type FullCheckResult } from "../lib/api";
 import { saveRecentScan } from "./Home";
 
 /** Main scan/report page — driven by :mint URL param. */
@@ -19,18 +20,21 @@ export function Scan() {
 
   const [fullData, setFullData] = useState<FullCheckResult | null>(null);
   const [fullLoading, setFullLoading] = useState(false);
+  const [fullError, setFullError] = useState<string | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
 
   // Kick off lite scan on mount / when mint changes
   useEffect(() => {
     if (mint) scan(mint);
     setFullData(null);
+    setFullError(null);
+    setShowPayment(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mint]);
 
-  // Once lite data arrives, auto-fetch full report
+  // Save recent scan when lite data arrives
   useEffect(() => {
     if (!liteData) return;
-
     saveRecentScan({
       mint: liteData.mint,
       name: liteData.name,
@@ -38,25 +42,23 @@ export function Scan() {
       risk_score: liteData.risk_score,
       risk_level: liteData.risk_level,
     });
-
-    // Auto-fetch full report (free during launch)
-    let cancelled = false;
-    setFullLoading(true);
-    fetchFullReportFree(liteData.mint)
-      .then((data) => {
-        if (!cancelled) setFullData(data);
-      })
-      .catch(() => {
-        // Silently fail — lite report is still showing
-      })
-      .finally(() => {
-        if (!cancelled) setFullLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
   }, [liteData]);
+
+  // Load full report after payment completes
+  function handlePaymentComplete(accessToken: string) {
+    setShowPayment(false);
+    setFullLoading(true);
+    setFullError(null);
+
+    fetchFullReport(mint, accessToken)
+      .then((data) => setFullData(data))
+      .catch((err) =>
+        setFullError(
+          err instanceof Error ? err.message : "Failed to load full report",
+        ),
+      )
+      .finally(() => setFullLoading(false));
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
@@ -86,23 +88,50 @@ export function Scan() {
         </div>
       )}
 
-      {/* Report — full if loaded, lite as fallback */}
+      {/* Report — full if purchased, lite + paywall otherwise */}
       {!liteLoading && !liteError && liteData && (
         <>
           {fullData ? (
             <FullReport data={fullData} />
           ) : (
             <>
-              <LiteReport data={liteData} onGetFullReport={() => {}} />
+              <LiteReport
+                data={liteData}
+                onGetFullReport={() => setShowPayment(true)}
+              />
+
+              {/* Full report loading after payment */}
               {fullLoading && (
                 <div className="flex items-center justify-center gap-2 py-4 text-sm text-muted">
                   <LoadingSpinner small />
                   Loading detailed analysis…
                 </div>
               )}
+
+              {/* Full report fetch error */}
+              {fullError && (
+                <div className="mt-4 rounded-xl border border-danger/30 bg-danger/10 p-4 text-center">
+                  <p className="text-danger text-sm">{fullError}</p>
+                  <button
+                    onClick={() => setShowPayment(true)}
+                    className="mt-2 text-accent text-sm hover:underline"
+                  >
+                    Try again
+                  </button>
+                </div>
+              )}
             </>
           )}
         </>
+      )}
+
+      {/* Payment modal */}
+      {showPayment && (
+        <PaymentModal
+          mint={mint}
+          onPaymentComplete={handlePaymentComplete}
+          onClose={() => setShowPayment(false)}
+        />
       )}
     </div>
   );

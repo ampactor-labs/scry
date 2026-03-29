@@ -14,7 +14,7 @@ interface LiteReportProps {
 /** Assembles the free lite scan report. */
 export function LiteReport({
   data,
-  onGetFullReport: _onGetFullReport,
+  onGetFullReport,
 }: LiteReportProps) {
   const [copied, setCopied] = useState(false);
 
@@ -192,11 +192,67 @@ export function LiteReport({
         </div>
       </div>
 
-      {/* --- Full report loading indicator --- */}
-      <div className="rounded-xl border border-accent/30 bg-accent/10 p-4 text-center">
-        <p className="text-sm text-muted">
-          Full detailed report loading below…
-        </p>
+      {/* --- Paywall upsell --- */}
+      <div className="relative rounded-xl border border-accent/30 bg-surface overflow-hidden">
+        {/* Blurred preview of what's behind the paywall */}
+        <div className="pointer-events-none select-none blur-sm opacity-40 p-5 space-y-4">
+          <div className="rounded-lg bg-bg border border-border p-4">
+            <h3 className="text-sm font-semibold text-text mb-2">Score Breakdown</h3>
+            <div className="space-y-2">
+              <div className="h-2 w-3/4 rounded bg-border"></div>
+              <div className="h-2 w-1/2 rounded bg-border"></div>
+              <div className="h-2 w-2/3 rounded bg-border"></div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg bg-bg border border-border p-3">
+              <p className="text-xs text-muted">Top Holder</p>
+              <p className="text-sm font-mono text-text">████…████</p>
+            </div>
+            <div className="rounded-lg bg-bg border border-border p-3">
+              <p className="text-xs text-muted">LP Lock</p>
+              <p className="text-sm font-mono text-text">██.█% locked</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Overlay CTA */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/60 backdrop-blur-[2px] p-6">
+          <div className="bg-surface border border-border rounded-2xl p-6 shadow-lg max-w-sm text-center space-y-4">
+            <div className="w-12 h-12 mx-auto rounded-full bg-accent/20 flex items-center justify-center">
+              <span className="text-2xl">🔒</span>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-text">Full Report</h3>
+              <p className="text-muted text-sm mt-1">
+                Deep analysis with holder breakdown, LP lock details, score
+                breakdown, risk alerts, and Token-2022 audit.
+              </p>
+            </div>
+            <ul className="text-left text-sm text-muted space-y-1.5 mx-auto max-w-xs">
+              {[
+                "Holder concentration analysis",
+                "LP lock status & expiry",
+                "Score breakdown by check",
+                "Token-2022 extension audit",
+                "Risk alerts & change detection",
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <span className="text-accent text-xs">✦</span> {item}
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={onGetFullReport}
+              className="w-full bg-accent hover:bg-accent-hover text-white rounded-lg px-4 py-3 font-semibold transition-colors text-sm"
+            >
+              Unlock Full Report — $0.10 USDC
+            </button>
+            <p className="text-xs text-muted">
+              On-chain payment via Solana. No account needed.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

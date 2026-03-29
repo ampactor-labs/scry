@@ -13,7 +13,7 @@ const USDC_MINT =
   "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const TREASURY = import.meta.env.VITE_TREASURY_WALLET || "";
 // Convert dollar amount to USDC micro-units (6 decimals)
-const PAYMENT_DOLLARS = Number(import.meta.env.VITE_PAYMENT_AMOUNT || "1.5");
+const PAYMENT_DOLLARS = Number(import.meta.env.VITE_PAYMENT_AMOUNT || "0.10");
 const PAYMENT_AMOUNT = BigInt(Math.round(PAYMENT_DOLLARS * 1_000_000));
 
 interface PaymentModalProps {
@@ -144,7 +144,7 @@ export function PaymentModal({
         {/* Price display */}
         <div className="rounded-lg border border-border bg-bg p-4 flex justify-between items-center mb-6">
           <span className="text-muted text-sm">Full Token Report</span>
-          <span className="text-text font-semibold text-lg">$1.50 USDC</span>
+          <span className="text-text font-semibold text-lg">$0.10 USDC</span>
         </div>
 
         {/* What's included */}
@@ -197,7 +197,7 @@ export function PaymentModal({
                 <SpinIcon /> Verifying payment…
               </>
             )}
-            {(step === "idle" || step === "error") && "Pay $1.50 USDC"}
+            {(step === "idle" || step === "error") && "Pay $0.10 USDC"}
           </button>
         )}
 

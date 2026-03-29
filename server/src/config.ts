@@ -16,7 +16,7 @@ const envSchema = z.object({
   ACCESS_TOKEN_SECRET: z.string().min(16),
   DATABASE_PATH: z.string().default("./data/scry.db"),
   USDC_MINT: z.string().default("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
-  PAYMENT_AMOUNT_USDC: z.coerce.number().default(1.5),
+  PAYMENT_AMOUNT_USDC: z.coerce.number().default(0.10),
   NODE_ENV: z
     .enum(["development", "production", "test"])
     .default("development"),

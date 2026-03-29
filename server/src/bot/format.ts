@@ -99,7 +99,7 @@ export function formatLiteReport(
     ageLine,
     holderLine,
     summaryLine,
-    `🔗 Full report: [Open in Scry](${escapeMarkdownV2(baseUrl ?? "https://scry-production.up.railway.app")}/scan/${mint})`,
+    `🔓 [Unlock full report](${escapeMarkdownV2(baseUrl ?? "https://scry-production.up.railway.app")}/scan/${mint}) — holder breakdown, LP lock details, score analysis \\($0\\.10 USDC\\)`,
   ]
     .filter(Boolean)
     .join("\n");
