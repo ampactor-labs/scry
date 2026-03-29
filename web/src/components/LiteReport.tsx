@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { LiteScanResult } from "../lib/api";
-import { truncateAddress, formatAge, formatPercent } from "../lib/format";
+import { truncateAddress } from "../lib/format";
 import { RiskDial } from "./RiskDial";
 import { RiskBadge } from "./RiskBadge";
 import { CheckRow } from "./CheckRow";
@@ -128,15 +128,8 @@ export function LiteReport({
           )}
           <CheckRow
             label="Has Liquidity"
-            value={data.has_liquidity ? data.liquidity_rating : "None"}
-            risk={
-              data.has_liquidity
-                ? data.liquidity_rating === "DEEP" ||
-                  data.liquidity_rating === "MEDIUM"
-                  ? "SAFE"
-                  : "WARNING"
-                : "DANGEROUS"
-            }
+            value={data.has_liquidity ? "Yes" : "None"}
+            risk={data.has_liquidity ? "SAFE" : "DANGEROUS"}
             icon="💧"
           />
           <CheckRow
@@ -147,7 +140,15 @@ export function LiteReport({
           />
           <CheckRow
             label="Token Age"
-            value={formatAge(data.token_age_hours)}
+            value={
+              data.token_age_hours === null
+                ? "Unknown"
+                : data.token_age_hours < 1
+                  ? "< 1h"
+                  : data.token_age_hours < 24
+                    ? `${Math.round(data.token_age_hours)}h`
+                    : `${Math.round(data.token_age_hours / 24)}d`
+            }
             risk={
               data.token_age_hours === null
                 ? "WARNING"
@@ -158,20 +159,6 @@ export function LiteReport({
                     : "SAFE"
             }
             icon="⏱"
-          />
-          <CheckRow
-            label="Top-10 Concentration"
-            value={formatPercent(data.top_10_concentration)}
-            risk={
-              data.top_10_concentration === null
-                ? "WARNING"
-                : data.top_10_concentration > 60
-                  ? "DANGEROUS"
-                  : data.top_10_concentration > 30
-                    ? "WARNING"
-                    : "SAFE"
-            }
-            icon="👥"
           />
           <CheckRow
             label="Token-2022"
