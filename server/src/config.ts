@@ -17,6 +17,7 @@ const envSchema = z.object({
   DATABASE_PATH: z.string().default("./data/scry.db"),
   USDC_MINT: z.string().default("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
   PAYMENT_AMOUNT_USDC: z.coerce.number().default(0.10),
+  ADMIN_BYPASS_KEY: z.string().optional(),
   NODE_ENV: z
     .enum(["development", "production", "test"])
     .default("development"),

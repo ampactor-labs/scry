@@ -2,6 +2,7 @@ import { Router } from "express";
 import { verifyAccessToken } from "../lib/access-token.js";
 import { fetchFullCheck } from "../lib/tokensafe.js";
 import { logger } from "../lib/logger.js";
+import { config } from "../config.js";
 
 export const scanRouter = Router();
 
@@ -18,7 +19,14 @@ scanRouter.post("/full-check", async (req, res) => {
     return;
   }
 
-  if (!verifyAccessToken(access_token, mint)) {
+  let authValid = false;
+  if (config.ADMIN_BYPASS_KEY && access_token === config.ADMIN_BYPASS_KEY) {
+    authValid = true;
+  } else {
+    authValid = verifyAccessToken(access_token, mint);
+  }
+
+  if (!authValid) {
     res.status(401).json({ error: "Invalid or expired access token" });
     return;
   }

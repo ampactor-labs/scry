@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { useLiteScan } from "../hooks/useLiteScan";
 import { LiteReport } from "../components/LiteReport";
 import { FullReport } from "../components/FullReport";
@@ -23,14 +23,22 @@ export function Scan() {
   const [fullError, setFullError] = useState<string | null>(null);
   const [showPayment, setShowPayment] = useState(false);
 
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const adminKey = searchParams.get("admin");
+
   // Kick off lite scan on mount / when mint changes
   useEffect(() => {
     if (mint) scan(mint);
     setFullData(null);
     setFullError(null);
     setShowPayment(false);
+
+    if (adminKey && mint) {
+      handlePaymentComplete(adminKey);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mint]);
+  }, [mint, adminKey]);
 
   // Save recent scan when lite data arrives
   useEffect(() => {
